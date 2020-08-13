@@ -18,6 +18,13 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-md-4">
+            <a href="{{ route('add') }}">
+                <button type="button" class="btn btn-info">Tambah data</button>
+            </a>
+        </div>
+    
     </div>
 </div>
 @endsection
