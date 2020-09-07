@@ -18,14 +18,26 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 
-Route::group(['prefix' => 'v1'], function() {
+Route::group([
+    'prefix' => 'v1'], function($router) {
 
-    Route::post('/user/signin', [
-        'uses' => 'AuthController@signin'
+    Route::post('/user/login', [
+        'uses' => 'AuthController@login'
     ]);
 
     Route::post('/user/register', [
         'uses' => 'AuthController@register'
     ]);
 
+    Route::post('/user/logout', [
+        'uses' => 'AuthController@logout'
+    ]);
+
+    Route::post('/user/refresh', [
+        'uses' => 'AuthController@refresh'
+    ]);
+
+    Route::get('/user/user-profile', [
+        'uses' => 'AuthController@userProfile'
+    ]);
 });
