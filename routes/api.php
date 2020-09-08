@@ -41,10 +41,10 @@ Route::group([
     ]);
 
     Route::resource('/post/register', 'PostController', [
-        'only' => ['store', 'update'],
+        'only' => ['store', 'destroy']
     ]);
 
     Route::resource('post', 'PostController' , [
-        'except' => ['create' ,'edit', 'store']
+        'except' => ['create', 'edit']
     ]);
 });

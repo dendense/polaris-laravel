@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Validator;
 class PostController extends Controller
 {
     use UploadTrait;
-    
+
     protected $user;
 
     public function __construct()
@@ -180,18 +180,78 @@ class PostController extends Controller
             ], 400);
         }
 
-        $updated = $post->fill($request->all())
-        ->save();
+        $validator = Validator::make($request->all(), [
+            'title' => 'required|string|max:100',
+            'photo' => 'required|image|max:2048|',
+            'location' => 'required|string',
+            'place_name' => 'required|string',
+            'description' => 'string',
+            'transportation' => 'required',
+            'demography' => 'required',
+            'user_id' => 'required'
+        ]);
 
-        if ($updated) {
-            $updated->view_post = [
-                'href' => 'api/v1/post' . $updated->id,
+        if ($validator->fails()) {
+
+            $response = [
+                'status' => 'fail',
+                'success' => false,
+                'msg' => 'validation errors',
+                'errors' => $validator->errors()
+            ];
+
+            return response()->json($response, 422);
+        }
+
+        $title = $request->input('title');
+        $photo = $request->file('photo');
+        $location = $request->input('location');
+        $place_name = $request->input('place_name');
+        $description = $request->input('description');
+        $transportation = $request->input('transportation');
+        $demography = $request->input('demography');
+        $user_id = $request->input('user_id');
+
+        /**
+         * Codes below is to uploading images
+         */
+        /**
+         * Defining photo name
+         */
+        $name = Str::slug($request->input('title')) . '_' . time();
+        /**
+         * Folder path for uploading photo
+         */
+        $folder = '/post/images/';
+        /**
+         * Make file path where image will stored [Folder path + file name]
+         */
+        $filePath = $folder . $name . '.' . $photo->getClientOriginalExtension();
+        /**
+         * Upload image
+         */
+        $this->UploadOne($photo, $folder, 'public', $name);
+
+        /**
+         * Updating Post
+         */
+        $post->title = $title;
+        $post->photo = $filePath;
+        $post->location = $location;
+        $post->place_name = $place_name;
+        $post->description = $description;
+        $post->transportation = $transportation;
+        $post->demography = $demography;
+
+        if ($post->update()) {
+            $post->view_post = [
+                'href' => 'api/v1/post/' . $post->id,
                 'post' => 'GET'
             ];
             return response()->json([
                 'success' => true,
                 'msg' => 'Your post has been edited successfuly',
-                'post' => $updated
+                'post' => $post
             ], 200);
         }
         else {
