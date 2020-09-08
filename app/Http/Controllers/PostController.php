@@ -101,7 +101,6 @@ class PostController extends Controller
          */
         $this->UploadOne($photo, $folder, 'public', $name);
         
-
         $post = new Post([
             'title' => $title,
             'photo' => $filePath,
