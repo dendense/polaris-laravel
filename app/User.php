@@ -55,4 +55,12 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims() {
         return [];
     }
+
+    /**
+     * Get the post for the user
+     */
+    public function posts()
+    {
+        return $this->hasMany('App\Post');
+    }
 }

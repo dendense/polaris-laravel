@@ -14,12 +14,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Route::middleware('auth:api')->get('/user', function (Request $request) {
-//     return $request->user();
-// });
-
+/**
+ * Group for non protected route
+ */
 Route::group([
-    'prefix' => 'v1'], function($router) {
+    'prefix' => 'v1'], function() {
 
     Route::post('/user/login', [
         'uses' => 'AuthController@login'
@@ -39,5 +38,13 @@ Route::group([
 
     Route::get('/user/user-profile', [
         'uses' => 'AuthController@userProfile'
+    ]);
+
+    Route::resource('/post/register', 'PostController', [
+        'only' => ['store', 'update'],
+    ]);
+
+    Route::resource('post', 'PostController' , [
+        'except' => ['create' ,'edit', 'store']
     ]);
 });
