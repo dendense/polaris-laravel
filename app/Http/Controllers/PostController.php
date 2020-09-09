@@ -54,7 +54,8 @@ class PostController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:100',
-            'photo' => 'required|image|max:2048|',
+            'photo' => 'required',
+            'photo.*' => 'image',
             'location' => 'required|string',
             'place_name' => 'required|string',
             'description' => 'string',
@@ -76,7 +77,6 @@ class PostController extends Controller
         }
 
         $title = $request->input('title');
-        $photo = $request->file('photo');
         $location = $request->input('location');
         $place_name = $request->input('place_name');
         $description = $request->input('description');
@@ -84,33 +84,27 @@ class PostController extends Controller
         $demography = $request->input('demography');
         $user_id = $request->input('user_id');
 
-        /**
-         * Defining photo name
-         */
-        $name = Str::slug($request->input('title')) . '_' . time();
-        /**
-         * Folder path for uploading photo
-         */
-        $folder = '/post/images/';
-        /**
-         * Make file path where image will stored [Folder path + file name]
-         */
-        $filePath = $folder . $name . '.' . $photo->getClientOriginalExtension();
-        /**
-         * Upload image
-         */
-        $this->UploadOne($photo, $folder, 'public', $name);
-        
-        $post = new Post([
-            'title' => $title,
-            'photo' => $filePath,
-            'location' => $location,
-            'place_name' => $place_name,
-            'description' => $description,
-            'transportation' => $transportation,
-            'demography' => $demography,
-            'user_id' => $user_id
-        ]);
+        if($request->hasfile('photo'))
+         {
+
+            foreach($request->file('photo') as $file)
+            {
+                $name=$file->getClientOriginalName();
+                $file->move(public_path().'/images/', $name);  
+                $data[] = $name;  
+            }
+         }
+
+        $post = new Post;
+
+        $post->title = $title;
+        $post->photo = json_encode($data);
+        $post->location = $location;
+        $post->place_name = $place_name;
+        $post->description = $description;
+        $post->transportation = $transportation;
+        $post->demography = $demography;
+        $post->user_id = $user_id;
 
         if ($post->save()) {
 
