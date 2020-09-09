@@ -6,146 +6,162 @@ use App\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-
     private $status_code = 200;
 
+    /**
+     * Create a new AuthController instance.
+     *
+     * @return void
+     */
+    public function __construct() {
+        $this->middleware('auth:api', ['except' => ['login', 'register']]);
+    }
+
+    /**
+     * Get JWT via given credtials.
+     * 
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function login(Request $request)
+    {
+        /**
+         * Validation 
+         */
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required|string|min:8'
+        ]);
+
+        if($validator->fails()){
+            
+            $response = [
+                'status' => 'fail',
+                'success' => false,
+                'msg' => 'validation errors',
+                'errors' => $validator->errors()
+            ];
+
+            return response()->json($response, 422);
+        }
+
+        /**
+         * Comparing user data to database
+         */
+        if (! $token = auth()->attempt($validator->validated())) {
+            
+            $response = [
+                'status' => 'fail',
+                'success' => false,
+                'msg' => 'Unauthorized'
+            ];
+
+            return response()->json($response, 401);
+
+        }
+            return $this->createNewToken($token);
+        
+
+    }
+
+    /**
+     * Register a User
+     * 
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function register(Request $request)
     {
         /**
          * Validation
          */
         $validator = Validator::make($request->all(), [
-            'name' => 'required',
-            'email' => 'required|email',
-            'password' => 'required|min:8',
+            'name' => 'required|string|between:2,100',
+            'email' => 'required|email|string|max:100|unique:users',
+            'password' => 'required|min:8|string|confirmed',
         ]);
 
         if ($validator->fails()) {
             
-            return response()->json([
-                'status' => 'fails',
+            $response = [
+                'status' => 'fail',
                 'success' => false,
                 'msg' => 'Validation error',
                 'errors' => $validator->errors(),
-            ], 404);
+            ];
+
+            return response()->json($response, 400);
 
         }
 
-        /**
-         * Checking if email is already exist
-         */
-        $email_status = User::where('email',$request->email)->first();
+        $user = User::create(array_merge(
+            $validator->validated(),
+            ['password' => bcrypt($request->password)]
+        ));
+        $user->login = [
+            'href' => 'api/v1/user/login',
+            'method' => 'POST'
+        ];
 
-        if (is_null($email_status)) {
+        $response = [
+            'status' => $this->status_code,
+            'success' => true,
+            'msg' => 'User successfuly registrated',
+            'user' => $user
+        ];
 
-            $user = new User([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => bcrypt($request->password)
-            ]);
-
-            if ($user->save()) {
-
-                return response()->json([
-                    'status' => $this->status_code,
-                    'success' => true,
-                    'msg' => 'Registration completed',
-                    'data' => $user,
-                    'href' => 'api/v1/user/login',
-                    'method' => 'POST'
-                ], 200);
-
-            }
-            else {
-                
-                return response()->json([
-                    'status' => 'failed',
-                    'success' => true,
-                    'msg' => 'Registration failed',
-                ], 404);
-
-            }
-
-        }
-        else {
-
-            return response()->json([
-                'status' => 'failed',
-                'success' => false,
-                'msg' => 'Email is already registrated'
-            ]);
-
-        }
+        return response()->json($response, 200);
     }
 
-    public function signin(Request $request)
+    /**
+     * Log the user out (Invalidate the token)
+     * 
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function logout()
     {
-        /**
-         * Validation
-         */
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required|min:8'
+        auth()->logout();
+
+        return response()->json([
+            'msg' => 'User successfuly signed out'
         ]);
-
-        if($validator->fails()){
-            
-            return response()->json([
-                'status' => 'fail',
-                'success' => false,
-                'msg' => 'Validation errors',
-                'errors'=> $validator->errors(),
-                'href'=> '/user/login' 
-            ], 404);
-
-        }
-
-        /**
-         * Comparing user data to database
-         */
-        $credentials = $request->only('email', 'password');
-        if (Auth::attempt($credentials)) {
-            
-            $user = $this->user($request->email);
-
-            return response()->json([
-                'status' => $this->status_code,
-                'success' => true,
-                'msg' => 'You have logged in successfuly',
-                'href' => '/home',
-                'method' => 'GET',
-                'data' => $user,
-            ], 200);
-
-        }
-        else {
-            return response()->json([
-                'status' => 'failed',
-                'success' => false,
-                'msg' => 'Oops! Login Failed',
-            ], 404);
-        }
-        
-
     }
 
-    public function user($email)
+    /**
+     * Refresh token
+     * 
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function refresh()
     {
-        $user = array();
+        return $this->createNewToken(auth()->refresh());
+    }
 
-        if($email != '') {
-            
-            $user = User::where('email',$email)->first();
+    /**
+     * Get the authenticated User.
+     * 
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function userProfile()
+    {       
+        return response()->json(auth()->user());
+    }
 
-            return $user;
-        }
-        else
-        {
-            return false;
-        }
+    /**
+     * Get token arra structure.
+     * 
+     * @param $token
+     * 
+     * @return \Illuminate\Http\JsonResponse
+     */
+    protected function createNewToken($token)
+    {
+        return response()->json([
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => auth()->factory()->getTTL() * 60,
+            'user' => auth()->user()
+        ]);
     }
 }
