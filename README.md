@@ -27,6 +27,14 @@ Untuk memulai pengembangan, diperlukan software utama dan penunjang agar para pe
 - Browser > **[Chrome](https://www.google.com/chrome/)** / **[Mozilla Firefox](https://www.mozilla.org/en-US/firefox/)**
 - Virtual Machine > **[VirtualBox](https://www.virtualbox.org/wiki/Downloads)** Dengan Linux Server (Opsional)
 
+## Installation (After Pulling)
+- go to project directory
+- cp .env.example .env
+- composer install
+- composer require tymon/jwt-auth
+- composer require fruitcake/laravel-cors
+- php artisan migrate
+
 ## Node Module Yang Digunakan (Sejauh Ini)
 - **react-router-dom**
 - **node-sass**
