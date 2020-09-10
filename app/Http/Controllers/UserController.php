@@ -71,7 +71,7 @@ class UserController extends Controller
 
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|between:2,100',
-            'email' => 'required|email|string|max:100|unique:users',
+            'email' => 'required|email|string|max:100|unique:users,email,'.$user->id,
             'password' => 'required|min:8|string|confirmed',
             'profile_image' => 'image'
         ]);
@@ -98,29 +98,16 @@ class UserController extends Controller
         /**
          * Codes below is to uploading images
          */
-        /**
-         * Defining photo name
-         */
-        $photo_name = Str::slug($request->input('name')) . '_' . time();
-        /**
-         * Folder path for uploading photo
-         */
-        $folder = '/user/images/';
-        /**
-         * Make file path where image will stored [Folder path + file name]
-         */
-        $filePath = $folder . $photo_name . '.' . $photo->getClientOriginalExtension();
-        /**
-         * Upload image
-         */
-        $this->UploadOne($photo, $folder, 'public', $photo_name);
+        $p_name = $photo->getClientOriginalName();
+        $photo->move(storage_path().'/images/', $p_name);  
+        $data[] = $p_name;
 
         $user = User::where('id', $id)
             ->update([
                 'name' => $name,
                 'email' => $email,
-                'password' => $password,
-                'profile_image' => $filePath
+                'password' => bcrypt($password),
+                'profile_image' => $data
             ]);
         
         $user = User::where('id', $id)->first();
