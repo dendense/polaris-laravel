@@ -40,6 +40,10 @@ Route::group([
         'uses' => 'AuthController@userProfile'
     ]);
 
+    Route::resource('/user', 'UserController', [
+        'only' => ['update', 'show']
+    ]);
+
     Route::resource('/post/register', 'PostController', [
         'only' => ['store', 'destroy']
     ]);
@@ -47,4 +51,5 @@ Route::group([
     Route::resource('post', 'PostController' , [
         'except' => ['create', 'edit']
     ]);
+
 });
