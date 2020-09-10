@@ -90,7 +90,7 @@ class PostController extends Controller
             foreach($request->file('photo') as $file)
             {
                 $name=$file->getClientOriginalName();
-                $file->move(public_path().'/images/', $name);  
+                $file->move(storage_path().'/images/', $name);  
                 $data[] = $name;  
             }
          }
@@ -175,7 +175,8 @@ class PostController extends Controller
 
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:100',
-            'photo' => 'required|image|max:2048|',
+            'photo' => 'required',
+            'photo.*' => 'image',
             'location' => 'required|string',
             'place_name' => 'required|string',
             'description' => 'string',
@@ -210,24 +211,25 @@ class PostController extends Controller
             foreach($request->file('photo') as $file)
             {
                 $name=$file->getClientOriginalName();
-                $file->move(public_path().'/images/', $name);  
+                $file->move(storage_path().'/images/', $name);  
                 $data[] = $name;  
             }
          }
 
-        $post = new Post;
+        $post = Post::where('id', $id)->update([
+            'title' => $title,
+            'photo' => json_encode($data),
+            'location' => $location,
+            'place_name' => $place_name,
+            'description' => $description,
+            'transportation' => $transportation,
+            'demography' => $demography,
+            'user_id' => $user_id
+        ]);
 
-        $post->title = $title;
-        $post->photo = json_encode($data);
-        $post->location = $location;
-        $post->place_name = $place_name;
-        $post->description = $description;
-        $post->transportation = $transportation;
-        $post->demography = $demography;
-        $post->user_id = $user_id;
+        $post = Post::where('id', $id)->first();
 
-
-        if ($post->update()) {
+        if ($post) {
             $post->view_post = [
                 'href' => 'api/v1/post/' . $post->id,
                 'method' => 'GET'
