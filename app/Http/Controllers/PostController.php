@@ -197,7 +197,6 @@ class PostController extends Controller
         }
 
         $title = $request->input('title');
-        $photo = $request->file('photo');
         $location = $request->input('location');
         $place_name = $request->input('place_name');
         $description = $request->input('description');
@@ -205,41 +204,33 @@ class PostController extends Controller
         $demography = $request->input('demography');
         $user_id = $request->input('user_id');
 
-        /**
-         * Codes below is to uploading images
-         */
-        /**
-         * Defining photo name
-         */
-        $name = Str::slug($request->input('title')) . '_' . time();
-        /**
-         * Folder path for uploading photo
-         */
-        $folder = '/post/images/';
-        /**
-         * Make file path where image will stored [Folder path + file name]
-         */
-        $filePath = $folder . $name . '.' . $photo->getClientOriginalExtension();
-        /**
-         * Upload image
-         */
-        $this->UploadOne($photo, $folder, 'public', $name);
+        if($request->hasfile('photo'))
+         {
 
-        /**
-         * Updating Post
-         */
+            foreach($request->file('photo') as $file)
+            {
+                $name=$file->getClientOriginalName();
+                $file->move(public_path().'/images/', $name);  
+                $data[] = $name;  
+            }
+         }
+
+        $post = new Post;
+
         $post->title = $title;
-        $post->photo = $filePath;
+        $post->photo = json_encode($data);
         $post->location = $location;
         $post->place_name = $place_name;
         $post->description = $description;
         $post->transportation = $transportation;
         $post->demography = $demography;
+        $post->user_id = $user_id;
+
 
         if ($post->update()) {
             $post->view_post = [
                 'href' => 'api/v1/post/' . $post->id,
-                'post' => 'GET'
+                'method' => 'GET'
             ];
             return response()->json([
                 'success' => true,
