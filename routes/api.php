@@ -52,4 +52,11 @@ Route::group([
         'except' => ['create', 'edit']
     ]);
 
+    Route::post('/user/report', [
+        'uses' => 'ReportController@reportUser'
+    ]);
+
+    Route::post('/post/report', [
+        'uses' => 'ReportController@reportPost'
+    ]);
 });

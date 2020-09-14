@@ -24,6 +24,7 @@ class CreatePostsTable extends Migration
             $table->string('demography');
             $table->timestamps();
             $table->integer('user_id');
+            $table->boolean('status')->default(false);
         });
     }
 
