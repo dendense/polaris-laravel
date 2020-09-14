@@ -59,4 +59,17 @@ Route::group([
     Route::post('/post/report', [
         'uses' => 'ReportController@reportPost'
     ]);
+
+    Route::get('/user/chat/contact', [
+        'uses' => 'MessagesController@get'
+    ]);
+
+    Route::post('/user/conversation/send', [
+        'uses' => 'MessagesController@send'
+    ]);
+
+    Route::get('/user/conversation/{id}', [
+        'uses' => 'MessagesController@getMessageFor'
+    ]);
+
 });
