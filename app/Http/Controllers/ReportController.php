@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\ReportPost;
 use App\ReportUser;
-use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
