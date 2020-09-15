@@ -72,12 +72,20 @@ Route::group([
         'uses' => 'MessagesController@get'
     ]);
 
-    Route::post('user/conversation/send', [
+    Route::post('user/conversation', [
         'uses' => 'MessagesController@send'
     ]);
 
     Route::get('user/conversation/{id}', [
         'uses' => 'MessagesController@getMessageFor'
+    ]);
+
+    Route::delete('user/conversation/{id}', [
+        'uses' => 'MessagesController@deleteChat'
+    ]);
+
+    Route::delete('user/conversation/d/{id}', [
+        'uses' => 'MessagesController@deleteMessages'
     ]);
 
     Route::resource('user/follow', 'FollowerController', [
