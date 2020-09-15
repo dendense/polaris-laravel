@@ -70,6 +70,17 @@ class MessagesController extends Controller
     {
         $messages = Message::where('from', $id)->orWhere('to', $id)->get();
 
+        $messages = Message::where(
+            function ($query) use ($id) {
+                $query->where('from', auth()->id());
+                $query->where('to', $id);
+        })->orWhere(
+            function ($query) use ($id) {
+                $query->where('from', $id);
+                $query->where('to', auth()->id());
+            }
+        )->get();
+
         if (is_null($messages)) {
             return response()->json([
                 'status' => 'failed',
@@ -82,12 +93,74 @@ class MessagesController extends Controller
     }
 
     /**
+     * Delete selected chat
+     * 
+     * @param $id
+     * @return \Illuminate\Http\Respons
+     */
+    public function deleteChat($id)
+    {
+        $chats = Message::where(
+            function ($query) use ($id) {
+                $query->where('from', auth()->id());
+                $query->where('to', $id);
+        })->orWhere(
+            function ($query) use ($id) {
+                $query->where('from', $id);
+                $query->where('to', auth()->id());
+            }
+        )->get();
+
+        foreach ($chats as $chat) {
+            $chat->delete();
+        }
+        if ($chats->isEmpty()) {
+
+            return response()->json([
+                'status' => 'failed',
+                'success' => false,
+                'msg' => 'Chat failed to delete'
+            ]);
+        }
+
+        return response()->json([
+            'status' => 200,
+            'success' => true,
+            'msg' => 'Chat deleted successfuly',
+            'create_chat' => [
+                'href' => 'api/v1/user/conversation/send',
+                'param' => 'to, from, text',
+                'method' => 'POST'
+                ]
+        ]);
+    }
+
+    /**
      * Delete selected messages
      * 
      * @param $id
      * @return \Illuminate\Http\Respons
      */
-    public function delete_chat($id)
+    public function deleteMessages($id)
     {
+        $messages = Message::where('id', $id)->first();
+
+        if (!$messages->delete()) {
+            return response()->json([
+                'status' => 'failed',
+                'success' => false,
+                'msg' => 'Chat failed to delete'
+            ]);
+        }
+        return response()->json([
+            'status' => 200,
+            'success' => true,
+            'msg' => 'message deleted successfuly',
+            'send_message' => [
+                'href' => 'api/v1/user/conversation/send',
+                'param' => 'to, from, text',
+                'method' => 'POST'
+                ]
+        ]);
     }
 }
