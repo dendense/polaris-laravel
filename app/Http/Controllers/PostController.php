@@ -276,4 +276,33 @@ class PostController extends Controller
 
         return response()->json($response, 200);
     }
+
+    /**
+     * Search post
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function search(Request $request)
+    {
+        $post = Post::where('title', 'like', $request->title.'%')
+            ->orWhere('place_name', 'like', $request->title.'%')->get();
+
+        if ($post->isEmpty()) {
+            return response()->json([
+                'status' => 404,
+                'success' => false,
+                'msg' => "Search failed, such post didn't exist"
+            ]);
+        }
+        else {
+            return response()->json([
+                'status' => 200,
+                'success' => true,
+                'msg' => 'Search success',
+                'post' => $post,
+            ]);
+        }
+        
+    }
 }

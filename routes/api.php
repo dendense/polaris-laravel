@@ -44,6 +44,10 @@ Route::group([
         'only' => ['update', 'show']
     ]);
 
+    Route::post('/user/search', [
+        'uses' => 'UserController@search'
+    ]);
+
     Route::resource('/post/register', 'PostController', [
         'only' => ['store', 'destroy']
     ]);
@@ -52,7 +56,11 @@ Route::group([
         'except' => ['create', 'edit']
     ]);
 
-    Route::post('/user/report', [
+    Route::post('/post/search', [
+        'uses' => 'PostController@search'
+    ]);
+
+    Route::post('user/report', [
         'uses' => 'ReportController@reportUser'
     ]);
 
@@ -60,16 +68,19 @@ Route::group([
         'uses' => 'ReportController@reportPost'
     ]);
 
-    Route::get('/user/chat/contact', [
+    Route::get('user/chat/contact', [
         'uses' => 'MessagesController@get'
     ]);
 
-    Route::post('/user/conversation/send', [
+    Route::post('user/conversation/send', [
         'uses' => 'MessagesController@send'
     ]);
 
-    Route::get('/user/conversation/{id}', [
+    Route::get('user/conversation/{id}', [
         'uses' => 'MessagesController@getMessageFor'
     ]);
 
+    Route::resource('user/follow', 'FollowerController', [
+        'except' => ['create', 'edit', 'update']
+    ]);
 });

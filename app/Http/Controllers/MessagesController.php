@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 class MessagesController extends Controller
 {
     /**
-     * Protecting ReportController
+     * Protecting MessageController
      */
     public function __construct()
     {
@@ -79,5 +79,15 @@ class MessagesController extends Controller
         }
 
         return response()->json($messages);
+    }
+
+    /**
+     * Delete selected messages
+     * 
+     * @param $id
+     * @return \Illuminate\Http\Respons
+     */
+    public function delete_chat($id)
+    {
     }
 }

@@ -38,7 +38,7 @@ class AuthController extends Controller
         if($validator->fails()){
             
             $response = [
-                'status' => 'fail',
+                'status' => 'failed',
                 'success' => false,
                 'msg' => 'validation errors',
                 'errors' => $validator->errors()
@@ -53,7 +53,7 @@ class AuthController extends Controller
         if (! $token = auth()->attempt($validator->validated())) {
             
             $response = [
-                'status' => 'fail',
+                'status' => 'failed',
                 'success' => false,
                 'msg' => 'Unauthorized'
             ];
@@ -85,7 +85,7 @@ class AuthController extends Controller
         if ($validator->fails()) {
             
             $response = [
-                'status' => 'fail',
+                'status' => 'failed',
                 'success' => false,
                 'msg' => 'Validation error',
                 'errors' => $validator->errors(),

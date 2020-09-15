@@ -131,4 +131,31 @@ class UserController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Search post
+     * 
+     * @param  Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function search(Request $request)
+    {
+
+        $user = User::where('name', 'like', $request->name.'%')->get();
+
+        if ($user->isEmpty()) {
+            return response()->json([
+                'status' => 404,
+                'success' => false,
+                'msg' => 'Search failed, no such user is exist',
+            ]);
+        }
+
+        return response()->json([
+            'status' => 200,
+            'success' => true,
+            'msg' => 'Search is completed',
+            'user' => $user
+        ]);
+    }
 }
