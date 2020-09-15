@@ -69,43 +69,21 @@ class FollowerController extends Controller
         ]);
 
         if (!$following) {
-
-            return response()->json([
-                'status' => 'failed',
-                'success' => false,
-                'msg' => 'Following success',
-                'view_following' => [
-                    'href' => 'user/follow',
-                    'method' => 'GET'
-                    ]
-            ]);
-        }
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        $user = User::where('id', $id)->first();
-
-        if (is_null($user)) {
-            
-            return response()->json([
-                'status' => 'failed',
-                'success' => false,
-                'msg' => 'Search is failed, there is nothing here'
-            ]);
+           return response()->json([
+               'status' => 'failed',
+               'success' => false,
+               'msg' => 'Fail current following'
+           ]); 
         }
 
         return response()->json([
             'status' => 200,
             'success' => true,
-            'msg' => 'Search is completed',
-            'user' => $user
+            'msg' => 'Following successfuly',
+            'view_following' => [
+                'href' => 'user/follow',
+                'method' => 'GET'
+                ]
         ]);
     }
 
@@ -117,18 +95,10 @@ class FollowerController extends Controller
      */
     public function destroy($id)
     {
-        $follower = Follower::where('follower', $id)->first();
-        
-        if (is_null($follower)) {
-            
-            return response()->json([
-                'status' => 'failed',
-                'success' => false,
-                'msg' => 'Deleting failed, there is not a such data here'
-            ]);
-        }
+        $following = Follower::where('following', $id)->where('follower', auth()->id())
+            ->first();
 
-        if (! $follower->delete()) {
+        if (! $following->delete()) {
             $response = [
                 'msg' => 'Delete failed'
             ];
@@ -136,7 +106,7 @@ class FollowerController extends Controller
         }
 
         $response = [
-            'msg' => 'Delete follower successfuly',
+            'msg' => 'Unfollowing successfuly',
         ];
 
         return response()->json($response, 200);

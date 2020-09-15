@@ -44,7 +44,7 @@ Route::group([
         'only' => ['update', 'show']
     ]);
 
-    Route::post('/user/search', [
+    Route::post('/user/s', [
         'uses' => 'UserController@search'
     ]);
 
@@ -56,7 +56,7 @@ Route::group([
         'except' => ['create', 'edit']
     ]);
 
-    Route::post('/post/search', [
+    Route::post('/post/s', [
         'uses' => 'PostController@search'
     ]);
 
@@ -81,6 +81,6 @@ Route::group([
     ]);
 
     Route::resource('user/follow', 'FollowerController', [
-        'except' => ['create', 'edit', 'update']
+        'except' => ['create', 'edit', 'update', 'show']
     ]);
 });
